@@ -6,20 +6,58 @@
 
 body {
   margin: 0;
-  height: 100vh;
-  width: 100vw;
+  font-family: 'Inter', sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  scroll-behavior: smooth;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navbar {
   display: flex;
   justify-content: center;
-  align-items: center;
-  background-color: #f0f2f5;
-  font-family: 'Inter', sans-serif;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar a {
+  text-decoration: none;
   color: #333;
+  font-weight: 600;
+}
+
+.section {
+  padding: 4rem 2rem;
+  max-width: 70%;
+  margin: auto;
+  text-align: center;
+}
+
+#about {
+  max-width: 1000px;
+}
+
+li {
+  padding: 0.35rem;
+  list-style-type: none;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .card {
@@ -46,6 +84,99 @@ body {
   color: inherit;
 }
 
+.judges-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.judges-grid img {
+  width: 200px;
+  height: auto;
+  cursor: pointer;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.judges-grid img:hover {
+  transform: scale(1.05);
+}
+
+#judge-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+.card-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  max-width: 500px;
+  color: #000;
+  text-align: left;
+  position: relative;
+}
+
+#judge-card.hidden {
+  display: none;
+}
+
+.judge-image-wrapper {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.judge-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.card-content button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+}
+
+.gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.gallery-grid img {
+  width: 200px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.donate-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #121212;
@@ -56,7 +187,25 @@ body {
     box-shadow: 0 10px 20px rgba(255, 255, 255, 0.05);
   }
 
-  .text {
+  .text,
+  .navbar a {
+    color: #e0e0e0;
+  }
+
+  .card-content {
+    background: #1e1e1e;
+    color: #fff;
+  }
+
+  .navbar {
+    background-color: #1e1e1e;
+  }
+
+  .card-content button {
+    color: #aaa;
+  }
+
+  a {
     color: #e0e0e0;
   }
 }
