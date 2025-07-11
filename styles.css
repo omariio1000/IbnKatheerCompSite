@@ -61,8 +61,9 @@ li {
 }
 
 .card {
-  width: 90vh;
+  width: 90vw;
   max-width: 1500px;
+  max-height: 85vh;
   aspect-ratio: 16 / 9;
   background-image: url("logo.jpeg");
   background-size: cover;
@@ -217,7 +218,7 @@ li {
   }
 
   .card {
-    width: 30vh;
+    width: 80vw;
   }
 
   .section {
