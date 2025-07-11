@@ -9,8 +9,8 @@ const judgeData = {
     bio: "Sh. Abdullah Elsharkawy completed his memorization of the Qur'an at the age of 9 and went on to graduate with a BA from Al-Azhar. He has 11 Ijazaat in different Qira'at, demonstrating his expertise in Quranic recitation. He currently serves as the Imam and Director of the Qur'an Program at the MCYC Mosque in California. He holds a Master’s Degree in Qur’anic Sciences, is an official Judge in National and International Qur’an Competitions (Egypt and Multiple U.S. States), is a member of the electronic Fatwa group, Al-Azhar Alsharif, is a member of the Preaching and Guidance Authority of the Islamic Research Academy, is a member of the Syndicate of the Memorizers and Reciters of the Noble Qur’an, Egypt, and is an Imam and Khatib, Al-Azhar Alsharif.",
     image: "judge2.jpg"
   },
-  judge3: {
-    name: "Judge 3",
+  wasil: {
+    name: "Shaykh Wasil Jemal",
     bio: "A respected hafidh and teacher with deep roots in Quranic education across the U.S.",
     image: "judge3.jpg"
   }
