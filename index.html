@@ -1,73 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ibn Katheer Quran Competition</title>
-  <link rel='icon' href='logo.ico' type='image/x-icon'/ >
-  <link rel="stylesheet" href="styles.css" />
-  <script defer src="script.js"></script>
-</head>
-<body>
-  <nav class="navbar">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#judges">Judges</a>
-    <a href="#rules">Rules</a>
-    <a href="#register">Register</a>
-    <a href="#contact">Contact</a>
-    <a href="#donate">Donate</a>
-  </nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ibn Katheer Quran Competition</title>
+    <link rel='icon' href='logo.ico' type='image/x-icon'/ >
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#judges">Judges</a>
+      <a href="#rules">Rules</a>
+      <a href="#register">Register</a>
+      <a href="#contact">Contact</a>
+      <a href="#donate">Donate</a>
+    </nav>
 
-  <section id="home" class="container">
-    <div class="card"></div>
-    <div class="text">September 2025</div>
-  </section>
+    <section id="home" class="container">
+      <div class="card"></div>
+      <div class="text">September 2025</div>
+    </section>
 
-  <section id="about" class="section">
-    <h2>About</h2>
-    <p>The Ibn Katheer Quran Competition is a new annual statewide initiative launching in September 2025 to uplift Quranic literacy through high-level memorization and recitation. It will bring together participants from across Oregon in a spiritually grounded, professionally judged environment—featuring renowned scholars like Shaykh Mohamed Najeeb and Shaykh Abdullah Sharqawy.</p>
-  </section>
+    <section id="about" class="section">
+      <h2>About</h2>
+      <p>
+        The Ibn Katheer Quran Competition is a new annual statewide initiative
+        launching in September 2025 to uplift Quranic literacy through
+        high-level memorization and recitation. It will bring together
+        participants from across Oregon in a spiritually grounded,
+        professionally judged environment—featuring renowned scholars like
+        Shaykh Mohamed Najeeb and Shaykh Abdullah Sharqawy.
+      </p>
+    </section>
 
-  <section id="judges" class="section">
-    <h2>Judges</h2>
-    <div class="judges-grid">
-      <img src="judge1.jpg" alt="Shaykh Mohamed Najeeb" onclick="showJudgeCard('najeeb')">
-      <img src="judge2.jpg" alt="Shaykh Abdullah Sharqawy" onclick="showJudgeCard('sharqawy')">
-      <img src="judge3.jpg" alt="Shaykh Wasil Jemal" onclick="showJudgeCard('wasil')">
-    </div>
-    <div id="judge-card" class="hidden">
-      <div class="card-content">
-        <button onclick="closeJudgeCard()">Close</button>
-        <div id="judge-info"></div>
+    <section id="judges" class="section">
+      <h2>Judges</h2>
+      <h3>Click to learn more!</h3>
+      <div class="judges-grid">
+        <img
+          src="judge1.jpg"
+          alt="Shaykh Mohamed Najeeb"
+          onclick="showJudgeCard('najeeb')"
+        />
+        <img
+          src="judge2.jpg"
+          alt="Shaykh Abdullah Sharqawy"
+          onclick="showJudgeCard('sharqawy')"
+        />
+        <img
+          src="judge3.jpg"
+          alt="Shaykh Wasil Jemal"
+          onclick="showJudgeCard('wasil')"
+        />
       </div>
-    </div>
-  </section>
+      <div id="judge-card" class="hidden">
+        <div class="card-content">
+          <button onclick="closeJudgeCard()">Close</button>
+          <div id="judge-info"></div>
+        </div>
+      </div>
+    </section>
 
-  <section id="rules" class="section">
-    <h2>Rules and Regulations</h2>
-    <p>Participants must reside in Oregon.</p>
-    <p>Memorization will be judged based on accuracy and tajweed.</p>
-    <p>Categories will be based on age and Juz levels.</p>
-  </section>
+    <section id="rules" class="section">
+      <h2>Rules and Regulations</h2>
+      <p>Participants must reside in Oregon.</p>
+      <p>Memorization will be judged based on accuracy and tajweed.</p>
+      <p>Categories will be based on age and Juz levels.</p>
+    </section>
 
-  <section id="register" class="section">
-    <h2>Register</h2>
-    <h3><a title="Registration" href="https://tally.so/r/n9y8RY" target="_blank" rel="noopener noreferrer" class="donate-btn">Click Here to Register!</a></h3>
-    <iframe title="Registration" src="https://tally.so/r/n9y8RY" frameborder="0"></iframe>
-    <div></div>
-  </section>
+    <section id="register" class="section">
+      <h2>Register</h2>
+      <h3>
+        <a
+          title="Registration"
+          href="https://tally.so/r/n9y8RY"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="donate-btn"
+          >Click Here to Register!</a
+        >
+      </h3>
+      <iframe
+        title="Registration"
+        src="https://tally.so/r/n9y8RY"
+        frameborder="0"
+      ></iframe>
+      <div></div>
+    </section>
 
-  <section id="contact" class="section">
-    <h2>Communications and Social Media</h2>
-    <p>Email: <a href="mailto:ibnkatheercomp@gmail.com">ibnkatheercomp@gmail.com</a></p>
-    <p>Instagram: <a href="https://www.instagram.com/ibnkatheercomp/" rel="noopener noreferrer" target="_blank">@ibnkatheercomp</a></p>
-  </section>
+    <section id="contact" class="section">
+      <h2>Communications and Social Media</h2>
+      <p>
+        Email:
+        <a href="mailto:ibnkatheercomp@gmail.com">ibnkatheercomp@gmail.com</a>
+      </p>
+      <p>
+        Instagram:
+        <a
+          href="https://www.instagram.com/ibnkatheercomp/"
+          rel="noopener noreferrer"
+          target="_blank"
+          >@ibnkatheercomp</a
+        >
+      </p>
+    </section>
 
-  <section id="donate" class="section">
-    <h2>Support the Competition</h2>
-    <a href="https://www.zeffy.com/donation-form/ibn-katheer-quran-competition-5" target="_blank" rel="noopener noreferrer" class="donate-btn">Donate Now</a>
-    <p><strong>EIN:</strong> 39-2141910</p>
-  </section>
-</body>
+    <section id="donate" class="section">
+      <h2>Support the Competition</h2>
+      <p>
+        Your support helps us build a statewide tradition of Quranic excellence.
+        Every donation brings us closer to our goal.
+      </p>
+      <h3>
+        <a
+          href="https://www.zeffy.com/donation-form/ibn-katheer-quran-competition-5"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="donate-btn"
+          >Donate Now</a
+        >
+      </h3>
+      <p><strong>EIN:</strong> 39-2141910</p>
+    </section>
+  </body>
+  <button id="scroll-down-btn" onclick="scrollToNextSection()">↓</button>
 </html>

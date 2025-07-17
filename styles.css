@@ -37,7 +37,7 @@ a {
 }
 
 .section {
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
   max-width: 90%;
   margin: auto;
   text-align: center;
@@ -69,7 +69,7 @@ li {
   background-size: cover;
   background-position: center;
   border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   overflow: hidden;
 }
@@ -178,13 +178,49 @@ li {
   text-decoration: none;
   border-radius: 5vh;
   font-weight: bold;
+  cursor: pointer;
 }
 
 iframe {
-  width:100%;
+  width: 100%;
   max-width: 100%;
   height: 80vh;
   border: none;
+}
+
+#register h3 {
+  margin: 2rem 0;
+}
+
+#donate h3 {
+  margin: 2rem 0;
+}
+
+#scroll-down-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #b3b3b3;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease;
+}
+
+#scroll-down-btn:hover {
+  background-color: #999;
+}
+
+#scroll-down-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -207,7 +243,7 @@ iframe {
     color: #fff;
   }
 
-  .navbar{
+  .navbar {
     background-color: #1e1e1e;
   }
 
@@ -216,6 +252,11 @@ iframe {
   }
 
   .card-content button {
+    color: #aaa;
+  }
+
+  #scroll-down-btn {
+    background-color: #474646;
     color: #aaa;
   }
 
