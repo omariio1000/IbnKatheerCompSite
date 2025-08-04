@@ -12,6 +12,7 @@
     <nav class="navbar">
       <a href="#home">Home</a>
       <a href="#about">About</a>
+      <a href="#sponsors">Sponsors</a>
       <a href="#judges">Judges</a>
       <a href="#rules">Rules</a>
       <a href="#register">Register</a>
@@ -36,22 +37,54 @@
       </p>
     </section>
 
+    <section id="sponsors" class="section">
+      <h2>Platinum Sponsors</h2>
+      <div class="judges-grid">
+        <img
+          src="sponsors/MET.png"
+          alt="Muslim Educational Trust"
+          onclick="showJudgeCard('met')"
+        />
+        <img
+          src="sponsors/ICCH.jpg"
+          alt="Islamic Community Center of Hillsboro"
+          onclick="showJudgeCard('icch')"
+        />
+        <img
+          src="sponsors/Assaber.png"
+          alt="Masjid Assaber"
+          onclick="showJudgeCard('assaber')"
+        />
+        <img
+          src="sponsors/bilal.png"
+          alt="Bilal Masjid"
+          onclick="showJudgeCard('bilal')"
+        />
+      </div>
+      <div id="judge-card" class="hidden">
+        <div class="card-content">
+          <button onclick="closeJudgeCard()">Close</button>
+          <div id="judge-info"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="judges" class="section">
       <h2>Judges</h2>
       <h3>Click to learn more!</h3>
       <div class="judges-grid">
         <img
-          src="judge1.jpg"
+          src="najeeb.jpg"
           alt="Shaykh Mohamed Najeeb"
           onclick="showJudgeCard('najeeb')"
         />
         <img
-          src="judge2.jpg"
+          src="sharkawy.jpg"
           alt="Shaykh Abdullah Sharqawy"
           onclick="showJudgeCard('sharqawy')"
         />
         <img
-          src="judge3.jpg"
+          src="wasil.jpg"
           alt="Shaykh Wasil Jemal"
           onclick="showJudgeCard('wasil')"
         />
