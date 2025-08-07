@@ -288,3 +288,15 @@ iframe {
     border: none;
   }
 }
+
+#judge-info a {
+  color: #333;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  #judge-info a {
+    color: #e0e0e0;
+  }
+}
