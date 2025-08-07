@@ -38,6 +38,109 @@ const judgeData = {
     image: "sponsors/bilal.png",
     website: "https://www.bilalmasjid.com/",
   },
+  abubakr: {
+    name: "Masjid Abu-Bakr",
+    bio: "",
+    image: "partners/abubakr.jpg",
+    website: "https://masjidabubakarpdx.com/",
+  },
+  coolislam: {
+    name: "Cool Islam",
+    bio: "",
+    image: "partners/coolislam.png",
+    website: "https://coolislam.org/",
+  },
+  crescent: {
+    name: "Crescent PDX Sports",
+    bio: "",
+    image: "partners/crescent.jpg",
+    website: "https://www.crescentsportspdx.com/",
+  },
+  furqan: {
+    name: "Masjid Al-Furqan",
+    bio: "",
+    image: "partners/furqan.jpg",
+    website: "https://masjidfurqanpdx.org/",
+  },
+  hdf: {
+    name: "Human Development Fund",
+    bio: "",
+    image: "partners/hdf.png",
+    website: "https://hdfund.org/",
+  },
+  ibrahim: {
+    name: "Masjid Ibrahim",
+    bio: "",
+    image: "partners/masjidibrahim.png",
+    website: "https://masjid-ibrahim.com/",
+  },
+  isgp: {
+    name: "Islamic Society of Greater Portland",
+    bio: "",
+    image: "partners/isgp.png",
+    website: "https://isgponline.com/",
+  },
+  masportland: {
+    name: "Muslim American Society - Portland",
+    bio: "",
+    image: "partners/mas.png",
+    website: "https://www.facebook.com/MASPortland/",
+  },
+  towhid: {
+    name: "Towhid Islamic Center",
+    bio: "",
+    image: "partners/towhid.jpg",
+    website: "https://www.towhidic.org/",
+  },
+  nwdf: {
+    name: "Northwest Dawah Foundation",
+    bio: "",
+    image: "partners/nwdawah.jpg",
+    website: "https://www.facebook.com/nwdawahorg/",
+  },
+  oregondawah: {
+    name: "Oregon Da'wah Initiative",
+    bio: "",
+    image: "partners/oregondawah.png",
+    website: "https://www.oregondawah.org/",
+  },
+  osumsa: {
+    name: "Oregon State University MSA",
+    bio: "",
+    image: "partners/osumsa.png",
+    website: "https://www.instagram.com/osu.msa",
+  },
+  peaceaction: {
+    name: "Peace Action Network",
+    bio: "",
+    image: "partners/peaceaction.jpg",
+    website:
+      "https://www.facebook.com/people/Peace-Action-Network/61560397760704/",
+  },
+  psumsa: {
+    name: "Portland State University MSA",
+    bio: "",
+    image: "partners/pdxmsa.jpg",
+    website: "https://www.instagram.com/pdxmsa",
+  },
+  upmsa: {
+    name: "University of Portland MSA",
+    bio: "",
+    image: "partners/upmsa.jpg",
+    website: "https://www.instagram.com/up.msa",
+  },
+  wmcc: {
+    name: "Wilsonville Muslim Community Center",
+    bio: "",
+    image: "partners/wmcc.png",
+    website: "https://www.wmccoregon.org/",
+  },
+  zain: {
+    name: "Zain Institute",
+    bio: "",
+    image: "partners/zain.png",
+    website: "",
+  },
 };
 
 function showJudgeCard(id) {
@@ -51,12 +154,15 @@ function showJudgeCard(id) {
       </div>
       <h3>${data.name}</h3>
       <p>${data.bio}</p>
-      ${data.website ? `<p><a href="${data.website}" target="_blank" rel="noopener noreferrer">Visit Website</a></p>` : ''}
+      ${
+        data.website
+          ? `<p><a href="${data.website}" target="_blank" rel="noopener noreferrer">Visit Website</a></p>`
+          : ""
+      }
     `;
     card.classList.remove("hidden");
   }
 }
-
 
 function closeJudgeCard() {
   document.getElementById("judge-card").classList.add("hidden");
