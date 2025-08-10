@@ -202,3 +202,11 @@ window.addEventListener("scroll", () => {
     btn.classList.add("hidden");
   }
 });
+
+$(function(){
+  $('#menu').slicknav({
+    prependTo: 'body', // You can change where the mobile menu appears
+    label: '', // Removes "MENU" text, keeps only the hamburger
+    closeOnClick: true // Closes menu when a link is clicked
+  });
+});
