@@ -56,9 +56,15 @@ nav ul {
   max-width: 1000px;
 }
 
-li {
-  padding: 0.35rem;
+ul {
   list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+ul li {
+  margin: 0 0 10px 10px;
 }
 
 .container {
@@ -197,11 +203,7 @@ iframe {
   border: none;
 }
 
-#register h3 {
-  margin: 2rem 0;
-}
-
-#donate h3 {
+.section h3 {
   margin: 2rem 0;
 }
 
@@ -264,6 +266,7 @@ iframe {
 
   .donate-btn {
     background-color: #474646;
+    color: white
   }
 
   .card-content button {
