@@ -1,61 +1,37 @@
-# questionSite.py
-from playwright.sync_api import sync_playwright
-import sys
+import requests
+import webbrowser
 
-def open_in_reading_view(surah: int, ayah: int, locale: str = "en"):
-    base_url = f"https://quran.com/1/1"
-    verse_url = f"https://quran.com/{surah}?startingVerse={ayah}"
+def quran_links(surah: int, ayah: int, locale: str = "en"):
+    """
+    Return (chapter_link, reading_link) for a given surah & ayah.
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
+    chapter_link -> Quran.com chapter URL positioned at the ayah (Translation tab by default)
+    reading_link -> Quran.com mushaf page URL (Reading-style layout)
+    """
+    # 1) Chapter link with the verse positioned (still opens in Translation view)
+    chapter_link = f"https://quran.com/{surah}?startingVerse={ayah}"
 
-        # Step 1: Open base site
-        print("Opening base site:", base_url)
-        page.goto(base_url, wait_until="domcontentloaded")
-        page.wait_for_timeout(3000)  # wait for React to render
+    # 2) Reading-style link: look up the mushaf page number via a public API
+    try:
+        r = requests.get(
+            f"https://api.alquran.cloud/v1/ayah/{surah}:{ayah}",
+            timeout=10,
+        )
+        r.raise_for_status()
+        page = r.json()["data"]["page"]
+        reading_link = f"https://quran.com/{locale}/page/{page}"
+    except Exception:
+        # Fallback: if the API is unavailable, return None for the reading link
+        reading_link = None
 
-        # Step 2: Click Reading view toggle
-        clicked = page.evaluate("""() => {
-            // Find the Reading toggle button
-            const btns = Array.from(document.querySelectorAll('button'));
-            for (const btn of btns) {
-                if (btn.textContent && btn.textContent.toLowerCase().includes('reading')) {
-                    btn.click();
-                    return true;
-                }
-            }
-            // fallback: search by svg
-            const svgs = document.querySelectorAll('svg[xmlns="http://www.w3.org/2000/svg"]');
-            for (const svg of svgs) {
-                const b = svg.closest('button');
-                if (b && b.textContent.toLowerCase().includes('reading')) {
-                    b.click();
-                    return true;
-                }
-            }
-            return false;
-        }""")
-
-        if clicked:
-            print("Switched to Reading view ✅")
-        else:
-            print("Could not find Reading toggle ❌")
-
-        page.wait_for_timeout(1500)
-
-        # Step 3: Navigate to the verse (still stays in Reading view)
-        print("Navigating to verse:", verse_url)
-        page.goto(verse_url, wait_until="domcontentloaded")
-        page.wait_for_timeout(3000)
-
-        print("Browser will stay open for 20s...")
-        page.wait_for_timeout(20000)
-        browser.close()
+    return chapter_link, reading_link
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python questionSite.py <surah> <ayah>")
-        sys.exit(1)
-    open_in_reading_view(int(sys.argv[1]), int(sys.argv[2]))
+    s, a = 4, 82
+    chapter, reading = quran_links(s, a)
+    print("Chapter (positions verse):", chapter)
+    print("Reading-style (mushaf page):", reading or "(unavailable)")
+
+    # Optional: open the reading-style link directly
+    if reading:
+        webbrowser.open(reading)
