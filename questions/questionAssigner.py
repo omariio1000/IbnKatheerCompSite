@@ -1,36 +1,51 @@
 import requests
 from enum import Enum
 import pandas as pd
-import time
+import random
+from collections import defaultdict
+
 
 class CATEGORY(Enum):
-    THIRTY = 1
-    FIFTEEN1 = 2
-    FIFTEEN2 = 3
-    FIVE1 = 4
-    FIVE2 = 5
-    ONE = 6
+    THIRTY = 0
+    FIFTEEN1 = 1
+    FIFTEEN2 = 2
+    FIVE1 = 3
+    FIVE2 = 4
+    ONE = 5
 
-def get_page_number(surah: int, ayah: int) -> int | None:
-    """
-    Return the mushaf page number for a given surah & ayah using a public API.
-    If the API is unavailable or the request fails, return None.
-    """
-    try:
-        r = requests.get(
-            f"https://api.alquran.cloud/v1/ayah/{surah}:{ayah}",
-            timeout=10,
-        )
-        r.raise_for_status()
-        page = r.json()["data"]["page"]
-        time.sleep(0.5)
-        return page
-    except Exception:
-        return None
-    
+
+# How many questions per contestant for each category
+CATEGORY_QUESTIONS = {
+    CATEGORY.ONE: 3,
+    CATEGORY.FIVE1: 4,
+    CATEGORY.FIVE2: 4,
+    CATEGORY.FIFTEEN1: 5,
+    CATEGORY.FIFTEEN2: 5,
+    CATEGORY.THIRTY: 7,
+}
+
+
+def build_page_map() -> dict:
+    url = "https://api.alquran.cloud/v1/quran/quran-uthmani"
+    r = requests.get(url, timeout=20)
+    r.raise_for_status()
+    data = r.json()["data"]["surahs"]
+
+    page_map = {}
+    for surah in data:
+        for ayah in surah["ayahs"]:
+            page_map[(surah["number"], ayah["numberInSurah"])] = ayah["page"]
+
+    return page_map
+
+
+def get_page_number(page_map, surah: int, ayah: int) -> int | None:
+    return page_map.get((surah, ayah))
+
+
 def read_contestants(file_path: str) -> dict:
     contestants = {}
-    data = pd.read_excel(file_path, sheet_name="Sort by Alphabetical",header=0)
+    data = pd.read_excel(file_path, sheet_name="Sort by Alphabetical", header=0)
     for _, row in data.iterrows():
         name = row['Full Name']
         category = row['Category']
@@ -52,7 +67,7 @@ def read_contestants(file_path: str) -> dict:
                 category_list.append(CATEGORY.ONE)
             else:
                 raise ValueError(f"Unknown category: {category_str}")
-        
+
         session_list = []
         session_string_spliced = session.split(',')
         for session_str in session_string_spliced:
@@ -60,49 +75,112 @@ def read_contestants(file_path: str) -> dict:
             session_list.append(session_str)
 
         contestants[name] = (category_list, session_list)
-    
+
     return contestants
+
 
 def read_questions(file_path: str) -> dict:
     all_questions = {}
     data = []
     col_names = ['Question', 'Ayah Start']
+    PAGE_MAP = build_page_map()
 
-    data.append(pd.read_excel(file_path, sheet_name="Juz 1-30",header=None, names=col_names))
-    data.append(pd.read_excel(file_path, sheet_name="Juz 1-15",header=None, names=col_names))
-    data.append(pd.read_excel(file_path, sheet_name="Juz 16-30",header=None, names=col_names))
-    # data.append(pd.read_excel(file_path, sheet_name="Juz 1-5",header=None, names=col_names))
-    data.append(pd.read_excel(file_path, sheet_name="Juz 26-30",header=None, names=col_names))
-    # data.append(pd.read_excel(file_path, sheet_name="Juz 30",header=None, names=col_names))
+    data.append(pd.read_excel(file_path, sheet_name="Juz 1-30", header=None, names=col_names))
+    data.append(pd.read_excel(file_path, sheet_name="Juz 1-15", header=None, names=col_names))
+    data.append(pd.read_excel(file_path, sheet_name="Juz 16-30", header=None, names=col_names))
+    data.append(None)  # placeholder for Juz 1-5
+    data.append(pd.read_excel(file_path, sheet_name="Juz 26-30", header=None, names=col_names))
+    data.append(None)  # placeholder for Juz 30
 
     for i in range(len(data)):
         questions = []
-        for _, row in data[i].iterrows():
-            question = row['Question']
-            ayah_start = row['Ayah Start']
-            if pd.isna(question) or pd.isna(ayah_start):
-                continue
-            
-            surah_and_ayah = question.split(' ')[1].split(':')
-            print(surah_and_ayah)
-            surah = int(surah_and_ayah[0])
-            ayah = int(surah_and_ayah[1])
+        if data[i] is not None:
+            for _, row in data[i].iterrows():
+                question = row['Question']
+                if pd.isna(question):
+                    continue
 
-            page = get_page_number(surah, ayah)
+                surah_and_ayah = question.split(' ')[1].split(':')
+                surah = int(surah_and_ayah[0])
+                ayah = int(surah_and_ayah[1])
 
-            questions.append((question, ayah_start, page))
-        all_questions[i] = questions
-    
+                page = get_page_number(PAGE_MAP, surah, ayah)
+                questions.append((":".join(surah_and_ayah), page))
+
+        all_questions[CATEGORY(i)] = questions
+
     return all_questions
+
+def assign_questions(contestants: dict, all_questions: dict) -> dict:
+    """
+    Assign random questions to contestants by category and session.
+    Handles paired categories (FIVE1+FIVE2, FIFTEEN1+FIFTEEN2).
+    Returns { contestant_name: {category: (session, [questions])} }.
+    """
+    assignments = defaultdict(dict)
+
+    # Step 1: group contestants properly
+    grouped = defaultdict(list)  # (category, session) -> list of contestant names
+
+    for name, (categories, sessions) in contestants.items():
+        cat_idx = 0
+        sess_idx = 0
+
+        while cat_idx < len(categories) and sess_idx < len(sessions):
+            cat = categories[cat_idx]
+
+            if cat == CATEGORY.FIVE1 and cat_idx + 1 < len(categories) and categories[cat_idx + 1] == CATEGORY.FIVE2:
+                grouped[(CATEGORY.FIVE1, sessions[sess_idx])].append(name)
+                grouped[(CATEGORY.FIVE2, sessions[sess_idx])].append(name)
+                cat_idx += 2
+                sess_idx += 1
+            elif cat == CATEGORY.FIFTEEN1 and cat_idx + 1 < len(categories) and categories[cat_idx + 1] == CATEGORY.FIFTEEN2:
+                grouped[(CATEGORY.FIFTEEN1, sessions[sess_idx])].append(name)
+                grouped[(CATEGORY.FIFTEEN2, sessions[sess_idx])].append(name)
+                cat_idx += 2
+                sess_idx += 1
+            else:
+                grouped[(cat, sessions[sess_idx])].append(name)
+                cat_idx += 1
+                sess_idx += 1
+
+    # Step 2: assign questions
+    for (cat, sess), names in grouped.items():
+        names = sorted(names)  # alphabetical order
+        questions_pool = all_questions[cat][:]
+        random.shuffle(questions_pool)
+
+        needed_per_person = CATEGORY_QUESTIONS[cat]
+        total_needed = len(names) * needed_per_person
+
+        if total_needed > len(questions_pool):
+            # Not enough questions → give empty lists
+            for name in names:
+                assignments[name][cat] = (sess, [])
+            continue
+
+        idx = 0
+        for name in names:
+            assignments[name][cat] = (
+                sess,
+                questions_pool[idx: idx + needed_per_person]
+            )
+            idx += needed_per_person
+
+    return dict(sorted(assignments.items()))  # alphabetical by contestant
+
 
 def main():
     contestants = read_contestants("C:\\Users\\omari\\Downloads\\Ibn Katheer Quran Competition - Sessions 2025.xlsx")
-    for contestant in contestants:
-        print(contestant, contestants[contestant])
-
     questions = read_questions("C:\\Users\\omari\\Downloads\\question bank - ibn kathir comp.xlsx")
-    for question in questions:
-        print(questions, questions[question])
+
+    assignments = assign_questions(contestants, questions)
+
+    for name, data in assignments.items():
+        print(f"\n{name}:")
+        for cat, (sess, qs) in data.items():
+            print(f"  {cat.name} (Session {sess}): {qs}")
+
 
 if __name__ == "__main__":
     main()
