@@ -101,7 +101,6 @@ def read_questions(file_path: str) -> dict:
                     continue
                 
                 surah_and_ayah = question.split(':')
-                print(surah_and_ayah)
                 surah = int(surah_and_ayah[0].split(' ')[-1].strip())
                 ayah = int(surah_and_ayah[1].strip())
 
@@ -185,16 +184,80 @@ def assign_questions(contestants: dict, all_questions: dict) -> dict:
 
     return dict(sorted(assignments.items()))  # alphabetical by contestant
 
+def write_assignments(assignments: dict, filename: str) -> None:
+    with open(filename, "w", encoding="utf-8") as f:
+        # Group contestants by merged category
+        merged_categories = [
+            CATEGORY.THIRTY,
+            CATEGORY.FIFTEEN1,  # merge with FIFTEEN2
+            CATEGORY.FIVE1,     # merge with FIVE2
+            CATEGORY.ONE,
+        ]
+
+        for cat in merged_categories:
+            if cat in (CATEGORY.FIVE1, CATEGORY.FIVE2):
+                title = "FIVE"
+            elif cat in (CATEGORY.FIFTEEN1, CATEGORY.FIFTEEN2):
+                title = "FIFTEEN"
+            else:
+                title = cat.name
+
+            f.write(f"=== {title} ===\n\n")
+
+            # Collect contestants alphabetically who have this category
+            contestants = [
+                (name, data) for name, data in assignments.items()
+                if any(c in data for c in ([cat, cat] if cat in (CATEGORY.ONE, CATEGORY.THIRTY) else [CATEGORY.FIVE1, CATEGORY.FIVE2] if "FIVE" in title else [CATEGORY.FIFTEEN1, CATEGORY.FIFTEEN2]))
+            ]
+            contestants.sort(key=lambda x: x[0])
+
+            for name, data in contestants:
+                if title == "FIVE":
+                    sess, q1 = data.get(CATEGORY.FIVE1, (None, []))
+                    _, q2 = data.get(CATEGORY.FIVE2, (None, []))
+                elif title == "FIFTEEN":
+                    sess, q1 = data.get(CATEGORY.FIFTEEN1, (None, []))
+                    _, q2 = data.get(CATEGORY.FIFTEEN2, (None, []))
+                else:
+                    sess, q1 = data.get(cat, (None, []))
+                    q2 = []
+
+                f.write(f"{name} (Session {sess}):\n")
+
+                if title in ("FIVE", "FIFTEEN"):
+                    f.write("  OPTION 1:\n")
+                    for surah_ayah, page in q1:
+                        f.write(f"      {surah_ayah} (Page {page})\n")
+                    f.write("  OPTION 2:\n")
+                    for surah_ayah, page in q2:
+                        f.write(f"      {surah_ayah} (Page {page})\n")
+                else:
+                    for surah_ayah, page in q1:
+                        f.write(f"  {surah_ayah} (Page {page})\n")
+
+                f.write("\n")
+
+            f.write("\n")
+
+
 def main():
     contestants = read_contestants("C:\\Users\\omari\\Downloads\\Ibn Katheer Quran Competition - Sessions 2025.xlsx")
     questions = read_questions("C:\\Users\\omari\\Downloads\\question bank - ibn kathir comp.xlsx")
 
     assignments = assign_questions(contestants, questions)
 
+    # Print to console
     for name, data in assignments.items():
         print(f"\n{name}:")
         for cat, (sess, qs) in data.items():
             print(f"  {cat.name} (Session {sess}): {qs}")
+
+    # Write to a text file grouped by category
+    out_path = "C:\\Users\\omari\\Downloads\\assignments.txt"
+    write_assignments(assignments, out_path)
+    
+    print(f"\n✅ Assignments written to {out_path}")
+    print(f"\n✅ Assignments written to {out_path}")
 
 
 if __name__ == "__main__":
