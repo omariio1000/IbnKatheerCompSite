@@ -88,9 +88,9 @@ def read_questions(file_path: str) -> dict:
     data.append(pd.read_excel(file_path, sheet_name="Juz 1-30", header=None, names=col_names))
     data.append(pd.read_excel(file_path, sheet_name="Juz 1-15", header=None, names=col_names))
     data.append(pd.read_excel(file_path, sheet_name="Juz 16-30", header=None, names=col_names))
-    data.append(None)  # placeholder for Juz 1-5
+    data.append(pd.read_excel(file_path, sheet_name="Juz 1-5", header=None, names=col_names))
     data.append(pd.read_excel(file_path, sheet_name="Juz 26-30", header=None, names=col_names))
-    data.append(None)  # placeholder for Juz 30
+    data.append(pd.read_excel(file_path, sheet_name="Juz 30", header=None, names=col_names))
 
     for i in range(len(data)):
         questions = []
@@ -99,24 +99,20 @@ def read_questions(file_path: str) -> dict:
                 question = row['Question']
                 if pd.isna(question):
                     continue
-
-                surah_and_ayah = question.split(' ')[1].split(':')
-                surah = int(surah_and_ayah[0])
-                ayah = int(surah_and_ayah[1])
+                
+                surah_and_ayah = question.split(':')
+                print(surah_and_ayah)
+                surah = int(surah_and_ayah[0].split(' ')[-1].strip())
+                ayah = int(surah_and_ayah[1].strip())
 
                 page = get_page_number(PAGE_MAP, surah, ayah)
-                questions.append((":".join(surah_and_ayah), page))
+                questions.append((f"{surah}:{ayah}", page))
 
         all_questions[CATEGORY(i)] = questions
 
     return all_questions
 
 def assign_questions(contestants: dict, all_questions: dict) -> dict:
-    """
-    Assign random questions to contestants by category and session.
-    Handles paired categories (FIVE1+FIVE2, FIFTEEN1+FIFTEEN2).
-    Returns { contestant_name: {category: (session, [questions])} }.
-    """
     assignments = defaultdict(dict)
 
     # Step 1: group contestants properly
@@ -159,16 +155,35 @@ def assign_questions(contestants: dict, all_questions: dict) -> dict:
                 assignments[name][cat] = (sess, [])
             continue
 
+        # Try to avoid duplicate surahs per contestant
         idx = 0
         for name in names:
-            assignments[name][cat] = (
-                sess,
-                questions_pool[idx: idx + needed_per_person]
-            )
-            idx += needed_per_person
+            selected = []
+            used_surahs = set()
+
+            # First pass: try to pick unique surahs
+            for q in questions_pool[idx:]:
+                surah = int(q[0].split(":")[0])
+                if surah not in used_surahs:
+                    selected.append(q)
+                    used_surahs.add(surah)
+                if len(selected) == needed_per_person:
+                    break
+
+            # If not enough unique surahs, allow repeats
+            if len(selected) < needed_per_person:
+                for q in questions_pool[idx:]:
+                    if q not in selected:
+                        selected.append(q)
+                    if len(selected) == needed_per_person:
+                        break
+
+            assignments[name][cat] = (sess, selected)
+
+            # Remove assigned questions from pool
+            questions_pool = [q for q in questions_pool if q not in selected]
 
     return dict(sorted(assignments.items()))  # alphabetical by contestant
-
 
 def main():
     contestants = read_contestants("C:\\Users\\omari\\Downloads\\Ibn Katheer Quran Competition - Sessions 2025.xlsx")
