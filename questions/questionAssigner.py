@@ -25,7 +25,7 @@ CATEGORY_QUESTIONS = {
 }
 
 
-def build_page_map() -> dict:
+def build_page_and_juz_map() -> dict:
     url = "https://api.alquran.cloud/v1/quran/quran-uthmani"
     r = requests.get(url, timeout=20)
     r.raise_for_status()
@@ -34,13 +34,13 @@ def build_page_map() -> dict:
     page_map = {}
     for surah in data:
         for ayah in surah["ayahs"]:
-            page_map[(surah["number"], ayah["numberInSurah"])] = ayah["page"]
+            page_map[(surah["number"], ayah["numberInSurah"])] = (ayah["page"], ayah["juz"])
 
     return page_map
 
 
-def get_page_number(page_map, surah: int, ayah: int) -> int | None:
-    return page_map.get((surah, ayah))
+def get_page_and_juz(page_map, surah: int, ayah: int) -> tuple[int | None, int | None]:
+    return page_map.get((surah, ayah), (None, None))
 
 
 def read_contestants(file_path: str) -> dict:
@@ -50,6 +50,9 @@ def read_contestants(file_path: str) -> dict:
         name = row['Full Name']
         category = row['Category']
         session = row['Session']
+        ID = row['ID']
+
+        name = f"{ID}: {name}"
 
         category_list = []
         category_string_spliced = category.split(',')
@@ -79,11 +82,10 @@ def read_contestants(file_path: str) -> dict:
     return contestants
 
 
-def read_questions(file_path: str) -> dict:
+def read_questions(file_path: str, page_map: dict) -> dict:
     all_questions = {}
     data = []
     col_names = ['Question', 'Ayah Start']
-    PAGE_MAP = build_page_map()
 
     data.append(pd.read_excel(file_path, sheet_name="Juz 1-30", header=None, names=col_names))
     data.append(pd.read_excel(file_path, sheet_name="Juz 1-15", header=None, names=col_names))
@@ -104,18 +106,18 @@ def read_questions(file_path: str) -> dict:
                 surah = int(surah_and_ayah[0].split(' ')[-1].strip())
                 ayah = int(surah_and_ayah[1].strip())
 
-                page = get_page_number(PAGE_MAP, surah, ayah)
-                questions.append((f"{surah}:{ayah}", page))
+                page, juz = get_page_and_juz(page_map, surah, ayah)
+                questions.append((f"{surah}:{ayah}", page, juz))
 
         all_questions[CATEGORY(i)] = questions
 
     return all_questions
 
+
 def assign_questions(contestants: dict, all_questions: dict) -> dict:
     assignments = defaultdict(dict)
 
-    # Step 1: group contestants properly
-    grouped = defaultdict(list)  # (category, session) -> list of contestant names
+    grouped = defaultdict(list)
 
     for name, (categories, sessions) in contestants.items():
         cat_idx = 0
@@ -139,9 +141,8 @@ def assign_questions(contestants: dict, all_questions: dict) -> dict:
                 cat_idx += 1
                 sess_idx += 1
 
-    # Step 2: assign questions
     for (cat, sess), names in grouped.items():
-        names = sorted(names)  # alphabetical order
+        names = sorted(names)
         questions_pool = all_questions[cat][:]
         random.shuffle(questions_pool)
 
@@ -149,27 +150,24 @@ def assign_questions(contestants: dict, all_questions: dict) -> dict:
         total_needed = len(names) * needed_per_person
 
         if total_needed > len(questions_pool):
-            # Not enough questions → give empty lists
             for name in names:
                 assignments[name][cat] = (sess, [])
             continue
 
-        # Try to avoid duplicate surahs per contestant
         idx = 0
         for name in names:
             selected = []
-            used_surahs = set()
+            used_juz = set()
 
-            # First pass: try to pick unique surahs
             for q in questions_pool[idx:]:
-                surah = int(q[0].split(":")[0])
-                if surah not in used_surahs:
+                surah, ayah = q[0].split(":")
+                _, _, juz = q
+                if cat != CATEGORY.ONE and juz not in used_juz:
                     selected.append(q)
-                    used_surahs.add(surah)
+                    used_juz.add(juz)
                 if len(selected) == needed_per_person:
                     break
 
-            # If not enough unique surahs, allow repeats
             if len(selected) < needed_per_person:
                 for q in questions_pool[idx:]:
                     if q not in selected:
@@ -178,19 +176,17 @@ def assign_questions(contestants: dict, all_questions: dict) -> dict:
                         break
 
             assignments[name][cat] = (sess, selected)
-
-            # Remove assigned questions from pool
             questions_pool = [q for q in questions_pool if q not in selected]
 
-    return dict(sorted(assignments.items()))  # alphabetical by contestant
+    return dict(sorted(assignments.items()))
+
 
 def write_assignments(assignments: dict, filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        # Group contestants by merged category
         merged_categories = [
             CATEGORY.THIRTY,
-            CATEGORY.FIFTEEN1,  # merge with FIFTEEN2
-            CATEGORY.FIVE1,     # merge with FIVE2
+            CATEGORY.FIFTEEN1,
+            CATEGORY.FIVE1,
             CATEGORY.ONE,
         ]
 
@@ -204,10 +200,13 @@ def write_assignments(assignments: dict, filename: str) -> None:
 
             f.write(f"=== {title} ===\n\n")
 
-            # Collect contestants alphabetically who have this category
             contestants = [
                 (name, data) for name, data in assignments.items()
-                if any(c in data for c in ([cat, cat] if cat in (CATEGORY.ONE, CATEGORY.THIRTY) else [CATEGORY.FIVE1, CATEGORY.FIVE2] if "FIVE" in title else [CATEGORY.FIFTEEN1, CATEGORY.FIFTEEN2]))
+                if any(c in data for c in (
+                    [cat, cat] if cat in (CATEGORY.ONE, CATEGORY.THIRTY)
+                    else [CATEGORY.FIVE1, CATEGORY.FIVE2] if "FIVE" in title
+                    else [CATEGORY.FIFTEEN1, CATEGORY.FIFTEEN2]
+                ))
             ]
             contestants.sort(key=lambda x: x[0])
 
@@ -225,15 +224,30 @@ def write_assignments(assignments: dict, filename: str) -> None:
                 f.write(f"{name} (Session {sess}):\n")
 
                 if title in ("FIVE", "FIFTEEN"):
-                    f.write("  OPTION 1:\n")
-                    for surah_ayah, page in q1:
-                        f.write(f"      {surah_ayah} (Page {page})\n")
-                    f.write("  OPTION 2:\n")
-                    for surah_ayah, page in q2:
-                        f.write(f"      {surah_ayah} (Page {page})\n")
+                    if title in "FIVE":
+                        f.write("  OPTION 1 (Juz 1 - Juz 5):\n")
+                    else:
+                        f.write("  OPTION 1 (Juz 1 - Juz 15):\n")
+                    for surah_ayah, page, juz in q1:
+                        surah = surah_ayah.split(":")[0]
+                        ayah = surah_ayah.split(":")[1]
+                        f.write(f"      {surah_ayah} (Page {page}, Juz {juz})\n")
+                        f.write(f"        https://quran.com/{surah}?startingVerse={ayah}\n")
+                    if title in "FIVE":
+                        f.write("  OPTION 2 (Juz 26 - Juz 30):\n")
+                    else:
+                        f.write("  OPTION 2 (Juz 16 - Juz 30):\n")
+                    for surah_ayah, page, juz in q2:
+                        surah = surah_ayah.split(":")[0]
+                        ayah = surah_ayah.split(":")[1]
+                        f.write(f"      {surah_ayah} (Page {page}, Juz {juz})\n")
+                        f.write(f"        https://quran.com/{surah}?startingVerse={ayah}\n")
                 else:
-                    for surah_ayah, page in q1:
-                        f.write(f"  {surah_ayah} (Page {page})\n")
+                    for surah_ayah, page, juz in q1:
+                        surah = surah_ayah.split(":")[0]
+                        ayah = surah_ayah.split(":")[1]
+                        f.write(f"  {surah_ayah} (Page {page}, Juz {juz})\n")
+                        f.write(f"    https://quran.com/{surah}?startingVerse={ayah}\n")
 
                 f.write("\n")
 
@@ -242,22 +256,15 @@ def write_assignments(assignments: dict, filename: str) -> None:
 
 def main():
     contestants = read_contestants("C:\\Users\\omari\\Downloads\\Ibn Katheer Quran Competition - Sessions 2025.xlsx")
-    questions = read_questions("C:\\Users\\omari\\Downloads\\question bank - ibn kathir comp.xlsx")
+    page_map = build_page_and_juz_map()
+    questions = read_questions("C:\\Users\\omari\\Downloads\\question bank - ibn kathir comp.xlsx", page_map)
 
     assignments = assign_questions(contestants, questions)
 
-    # Print to console
-    for name, data in assignments.items():
-        print(f"\n{name}:")
-        for cat, (sess, qs) in data.items():
-            print(f"  {cat.name} (Session {sess}): {qs}")
-
-    # Write to a text file grouped by category
     out_path = "C:\\Users\\omari\\Downloads\\assignments.txt"
     write_assignments(assignments, out_path)
     
-    print(f"\n✅ Assignments written to {out_path}")
-    print(f"\n✅ Assignments written to {out_path}")
+    print(f"✅ Assignments written to {out_path}")
 
 
 if __name__ == "__main__":
