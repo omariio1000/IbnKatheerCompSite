@@ -52,7 +52,7 @@ def read_contestants(file_path: str) -> dict:
         session = row['Session']
         ID = row['ID']
 
-        name = f"{ID}: {name}"
+        name = f"{ID} - {name}"
 
         category_list = []
         category_string_spliced = category.split(',')
